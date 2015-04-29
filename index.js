@@ -1,12 +1,10 @@
 'use strict';
 
-var BPromise = require('bluebird');
-var path     = require('path');
-var fs       = require('fs');
-var glob     = require('glob');
-var yaml     = require('js-yaml');
-var merge    = require('merge');
-var parser   = require('swagger-parser');
+var path            = require('path');
+var merge           = require('merge');
+var readYaml        = require('./lib/read-yaml');
+var globAsync       = require('./lib/glob-async');
+var validateSwagger = require('./lib/validate-swagger');
 
 var DEFAULT_CONFIG = {
   swagger: '2.0',
@@ -17,17 +15,24 @@ var DEFAULT_CONFIG = {
   produces: ['application/json']
 };
 
-module.exports = function compileDocs(dir, options) {
+/**
+ * compileDocs
+ * This is what gets exported. It gets the api docs, merges in the default
+ * config, the found api docs, and the given options into one object to be
+ * validated with swagger
+ */
+function compileDocs(dir, options) {
   options = options || {};
-  var definitionsDir = options.definitionsDir || '_definitions';
-  var pathsDir = options.pathsDir || '';
+
+  var apiDocOptions = merge(true, {
+    definitionsDir: '_definitions',
+    pathsDir: ''
+  }, options);
+
   delete options.definitionsDir;
   delete options.pathsDir;
 
-  return getApiDocs(dir, {
-    definitionsDir: definitionsDir,
-    pathsDir: pathsDir
-  })
+  return getApiDocs(dir, apiDocOptions)
     .then(function (api) {
       return merge.recursive(true,
         DEFAULT_CONFIG,
@@ -36,11 +41,42 @@ module.exports = function compileDocs(dir, options) {
       );
     })
     .then(validateSwagger);
+}
+
+/**
+ * compileDocs.versions
+ * This is just a wrapper around compileDocs that makes making a versioned api
+ * with separate documentation super easy.
+ */
+compileDocs.versions = function (dir, options) {
+  options = options || {};
+  var versionPattern = options.versionPattern || 'v*';
+  delete options.versionPattern;
+
+  return globAsync(versionPattern + '/', {cwd: dir})
+    .reduce(function (versions, version) {
+      var versionPath = '/' + version
+        .split(path.sep)
+        .filter(function (a) { return !!a; })
+        .join('/');
+      var versionDir = path.join(dir, version);
+      var versionOptions = merge(true, {basePath: versionPath}, options);
+      var versionKey = version.substr(0, version.length - 1);
+      return compileDocs(versionDir, versionOptions).then(function (api) {
+        versions[versionKey] = api;
+        return versions;
+      });
+    }, {});
 };
 
+/**
+ * getApiDocs
+ * This gets all of the definitions from all of the yaml files in the given
+ * directory. This does not do any swagger validation
+ */
 function getApiDocs(dir, options) {
   var api;
-  return globAsync('index.{yaml,yml}', dir)
+  return globAsync('index.{yaml,yml}', {cwd: dir})
     .then(function (files) {
       if (!files.length) { throw new Error('index.yaml/.yml not found'); }
       return readYaml(dir, files[0]);
@@ -59,8 +95,13 @@ function getApiDocs(dir, options) {
     });
 }
 
+/**
+ * getDefinitions
+ * Loads all of the api endpoint yaml definitions and returns the `definitions`
+ * object that gets put into the swagger json file
+ */
 function getDefinitions(dir) {
-  return globAsync('*.{yaml,yml}', dir)
+  return globAsync('*.{yaml,yml}', {cwd: dir})
     .reduce(function (definitions, filepath) {
       var name = path.basename(filepath, path.extname(filepath));
       return readYaml(dir, filepath).then(function (definitionObj) {
@@ -70,46 +111,25 @@ function getDefinitions(dir) {
     }, {});
 }
 
+/**
+ * getPaths
+ * Loads all of the api endpoint yaml definitions and returns the `paths` object
+ * that gets put into the swagger json file
+ */
 function getPaths(dir) {
-  return globAsync('**/*.{yaml,yml}', dir)
-    .filter(function (filepath) {
-      var isIndex = filepath === 'index.yaml';
-      var isDefinition = filepath.indexOf('_definitions') === 0;
-      return !isIndex && !isDefinition;
-    })
-    .reduce(function (paths, filepath) {
-      var url = filepath
-        .replace(/\.ya?ml$/, '')
-        .split(path.sep)
-        .join('/');
-      return readYaml(dir, filepath).then(function (pathObj) {
-        paths['/' + url] = pathObj;
-        return paths;
-      });
-    }, {});
-}
-
-function readYaml() {
-  var paths = Array.prototype.slice.call(arguments);
-  var filepath = path.join.apply(null, paths);
-  return readFileAsync(filepath).then(function (contents) {
-    return yaml.safeLoad(contents);
-  });
-}
-
-function readFileAsync(filepath) {
-  return BPromise.fromNode(fs.readFile.bind(null, filepath, 'utf8'));
-}
-
-function globAsync(pattern, cwd) {
-  return BPromise.fromNode(glob.bind(null, pattern, {cwd: cwd}));
-}
-
-function validateSwagger(api) {
-  return new BPromise(function (resolve, reject) {
-    parser.parse(api, function (err, validatedApi) {
-      if (err) { return reject(err); }
-      resolve(validatedApi);
+  return globAsync('**/*.{yaml,yml}', {
+    cwd: dir,
+    ignore: ['index.yaml', '_definitions/**']
+  }).reduce(function (paths, filepath) {
+    var url = filepath
+      .replace(/\.ya?ml$/, '')
+      .split(path.sep)
+      .join('/');
+    return readYaml(dir, filepath).then(function (pathObj) {
+      paths['/' + url] = pathObj;
+      return paths;
     });
-  });
+  }, {});
 }
+
+module.exports = compileDocs;
