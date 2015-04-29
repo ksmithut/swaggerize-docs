@@ -1,0 +1,55 @@
+get:
+  summary: 'Get a User'
+  description: |
+    Get a single user by id
+  tags:
+    - Users
+  parameters:
+    - name: id
+      in: path
+      description: The user's id
+      required: true
+      type: string
+  responses:
+    200:
+      description: A single user
+      schema:
+        $ref: '#/definitions/User'
+
+put:
+  summary: 'Update a User'
+  description: |
+    Update a user
+  tags:
+    - Users
+  parameters:
+    - name: id
+      in: path
+      description: The user's id
+      required: true
+      type: string
+    - name: user
+      in: body
+      description: the updated user object
+      required: true
+      schema:
+        $ref: '#/definitions/UserCreate'
+  responses:
+    200:
+      description: The updated user object
+      schema:
+        $ref: '#/definitions/User'
+
+delete:
+  summary: 'Deletes a User'
+  description: |
+    Deletes a user
+  parameters:
+    - name: id
+      in: path
+      description: The user's id
+      required: true
+      type: string
+  responses:
+    204:
+      description: No body because user was deleted
