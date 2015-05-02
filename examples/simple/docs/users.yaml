@@ -22,7 +22,20 @@ post:
       description: user to add to the system
       required: true
       schema:
-        $ref: '#/definitions/UserCreate'
+        type: object
+        properties:
+          email:
+            type: string
+            description: The user's unique email
+          firstName:
+            type: string
+            description: The user's first name
+          lastName:
+            type: string
+            description: The user's last name
+          password:
+            type: string
+            description: The user's password
   tags:
     - Users
   responses:

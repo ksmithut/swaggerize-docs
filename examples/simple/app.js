@@ -14,11 +14,17 @@ app.use(bodyParser.json());
 docs(path.join(__dirname, 'docs'))
   .then(function (api) {
 
+    console.log(api.paths);
+
     app.use(swaggerize({
       api: api,
       docspath: '/api-docs',
       handlers: './routes'
     }));
+
+    app.use(function (req, res) {
+      res.status(404).end();
+    });
 
     server.listen(8000, function () {
       console.log('server started');
