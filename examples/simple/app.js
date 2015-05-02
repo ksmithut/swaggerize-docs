@@ -14,8 +14,6 @@ app.use(bodyParser.json());
 docs(path.join(__dirname, 'docs'))
   .then(function (api) {
 
-    console.log(api.paths);
-
     app.use(swaggerize({
       api: api,
       docspath: '/api-docs',
