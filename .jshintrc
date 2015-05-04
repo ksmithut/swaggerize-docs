@@ -23,14 +23,12 @@
   "maxstatements" : 10,       // maximum number of statements in a function
   "newcap"        : true,     // must use capitalized constructors with the `new` keyword
   "noarg"         : true,     // mustn't use `arguments.callee` or `arguments.caller`
-  "nocomma"       : false,    // commas are allowed, but you shouldn't do comma first
   "noempty"       : true,     // blocks shouldn't be empty
   "nonbsp"        : true,     // prohibits use of non breaking whitespace characters
   "nonew"         : true,     // prohibits use of `new Constructor()` without assigning it to anything
   "notypeof"      : false,    // prohibits use of invalid `typeof` values
   "quotmark"      : "single", // must use single quotes all the time
   "shadow"        : "outer",  // Checks variable declaration scope. Also checks outer scope for already declared variables
-  "singleGroups"  : false,    // Grouping operator "()" may be used for single expressions
   "undef"         : true,     // prohibits the use of explicitly undeclared variables
   "unused"        : true,     // warns about declared but unused variables
 
