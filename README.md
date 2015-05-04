@@ -10,4 +10,19 @@
 [![Build Status](http://img.shields.io/travis/ksmithut/swaggerize-docs/master.svg?style=flat)](https://travis-ci.org/ksmithut/swaggerize-docs)
 [![Coverage Status](http://img.shields.io/codeclimate/coverage/github/ksmithut/swaggerize-docs.svg?style=flat)](https://codeclimate.com/github/ksmithut/swaggerize-docs)
 
+A complimentary swagger api docs that works especially well in conjunction with
+[`swaggerize-express`](https://github.com/krakenjs/swaggerize-express).
+
+# Installation
+
+```bash
+npm install swaggerize-docs --save
+```
+
+You should also read up on the [Swagger spec](http://swagger.io/).
+
+# Usage
+
+See [examples](https://github.com/ksmithut/swaggerize-docs/tree/master/examples/)
+
 

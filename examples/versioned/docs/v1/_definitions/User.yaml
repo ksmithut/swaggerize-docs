@@ -1,0 +1,10 @@
+properties:
+  email:
+    type: string
+    description: The user's unique email
+  firstName:
+    type: string
+    description: The user's first name
+  lastName:
+    type: string
+    description: The user's last name

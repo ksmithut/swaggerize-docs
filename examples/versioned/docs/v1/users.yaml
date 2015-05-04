@@ -1,0 +1,45 @@
+get:
+  summary: Get All Users
+  description: |
+    Gets all of the users
+  tags:
+    - Users
+  responses:
+    200:
+      description: An array of Users
+      schema:
+        type: array
+        items:
+          $ref: '#/definitions/User'
+
+post:
+  summary: Create a User
+  description: |
+    Creates a new user
+  parameters:
+    - name: user
+      in: body
+      description: user to add to the system
+      required: true
+      schema:
+        type: object
+        properties:
+          email:
+            type: string
+            description: The user's unique email
+          firstName:
+            type: string
+            description: The user's first name
+          lastName:
+            type: string
+            description: The user's last name
+          password:
+            type: string
+            description: The user's password
+  tags:
+    - Users
+  responses:
+    201:
+      description: The newly created user
+      schema:
+        $ref: '#/definitions/User'
