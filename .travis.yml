@@ -9,3 +9,5 @@ node_js:
   - "0.10"
   - iojs
 after_success: npm run codeclimate
+env:
+  - secure: Kzo3TMrCXQynvEDYs8juLEPoZttArC5vT7XuWkaWK/0N9ib6SRAUfWbQuFvHC410kymnMC9VwAJNldLyaGy6DunIpHuH5UkCdMucvoSM9J9R4USTsfN+UeVbLtfp5gn7/6f/3JUBUUxmengzHWJTwB0BIuhf2OGhDaX9f8b2WFA=
