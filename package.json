@@ -1,6 +1,6 @@
 {
   "name": "swaggerize-docs",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A node module to help build more dynamic swaggerize doc files. Compliments swaggerize-express very well",
   "main": "index.js",
   "files": [
