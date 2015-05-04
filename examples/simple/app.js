@@ -11,7 +11,7 @@ var server = http.createServer(app);
 
 app.use(bodyParser.json());
 
-docs(path.join(__dirname, 'docs'))
+module.exports = docs(path.join(__dirname, 'docs'))
   .then(function (api) {
 
     app.use(swaggerize({
@@ -24,9 +24,11 @@ docs(path.join(__dirname, 'docs'))
       res.status(404).end();
     });
 
-    server.listen(8000, function () {
+    server.listen(process.env.PORT || 8000, function () {
       console.log('server started');
     });
+
+    return app;
 
   })
   .catch(function (err) {
