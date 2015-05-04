@@ -10,7 +10,8 @@ var DEFAULT_CONFIG = {
   swagger: '2.0',
   info: {
     title: process.env.npm_package_name,
-    description: process.env.npm_package_description
+    description: process.env.npm_package_description,
+    version: process.env.npm_package_version
   },
   produces: ['application/json']
 };
@@ -83,7 +84,10 @@ function getApiDocs(dir, options) {
     })
     .then(function (baseApi) {
       api = baseApi;
-      return getPaths(path.resolve(dir, options.pathsDir));
+      return getPaths(
+        path.resolve(dir, options.pathsDir),
+        options.definitionsDir
+      );
     })
     .then(function (paths) {
       api.paths = paths;
@@ -116,10 +120,10 @@ function getDefinitions(dir) {
  * Loads all of the api endpoint yaml definitions and returns the `paths` object
  * that gets put into the swagger json file
  */
-function getPaths(dir) {
+function getPaths(dir, definitionsDir) {
   return globAsync('**/*.{yaml,yml}', {
     cwd: dir,
-    ignore: ['index.yaml', '_definitions/**']
+    ignore: ['index.yaml', definitionsDir + '/**']
   }).reduce(function (paths, filepath) {
     var url = filepath
       .replace(/\.ya?ml$/, '')

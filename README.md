@@ -23,6 +23,142 @@ You should also read up on the [Swagger spec](http://swagger.io/).
 
 # Usage
 
+This module is quite involved and requires you to set up your folder structure
+in a certain way. The best way to explain it is by example:
+
 See [examples](https://github.com/ksmithut/swaggerize-docs/tree/master/examples/)
 
+Basically, it builds out your swagger documentation by reading your folder
+structure and automagically combining them.
 
+You should have a folder dedicated to your swagger docs. In the examples, I use
+the `docs/` folder. Next, you should have in that folder an `index.yaml` with
+your top level swagger properties. It could look something like this:
+
+(Note that any `.yaml` file extension can be replaced with `.yml`. Whatever you
+choose to do, just be consistent.)
+
+```yaml
+swagger: '2.0'
+info:
+  title: My API
+  description: This is my API
+  version: '1.0.0'
+host: myhost.com
+schemes:
+  - https
+basePath: /v1
+produces:
+  - application/json
+```
+
+You don't have to include all of that. The default values are these:
+
+```yaml
+swagger: '2.0'
+info:
+  title: # the npm package name in your package.json if you used npm start or another npm command
+  description: # the npm package description in your package.json if you used npm start or another npm command
+  version: # The npm package version in your package.json if you used npm start or another npm command
+produces:
+  - application/json
+```
+
+If you don't start your app with an npm command, then you will need to proved
+the required `info` properties. Or you can just explicitly define them like you
+should anyway.
+
+Next, in that docs folder, you should have another folder called `_definitions`.
+Every `.yaml` file in that directory (not subdirectories) will be attached to
+the `definitions` property.
+
+For example, if you have a `User.yaml` in your `_definitions` folder, and
+`User.yaml` looks like this:
+
+```yaml
+properties:
+  email:
+    type: string
+    description: The user's unique email
+  firstName:
+    type: string
+    description: The user's first name
+  lastName:
+    type: string
+    description: The user's last name
+```
+
+...it will be attached to the `definitions` property of the swagger api docs
+like this:
+
+```json
+{
+  "definitions": {
+    "User": {
+      "properties": {
+        "email": {"type": "string", "description": "The user's unique email"},
+        "firstName": {"type": "string", "description": "The user's first name"},
+        "lastName": {"type": "string", "description": "The user's last name"}
+      }
+    }
+  }
+}
+```
+
+and can be used as a swagger `$ref` in `#/definitions/User`.
+
+As for your paths, the paths get automatically loaded in much like how
+`swaggerize-express` does it. If you have a `users.yaml` file in your docs
+directory, it will be loaded as:
+
+```json
+{
+  "paths": {
+    "/users": {}
+  }
+}
+```
+
+and if you have a `users/{id}.yaml` file in your docs directory, it will be
+loaded as:
+
+```json
+{
+  "paths": {
+    "/users/{id}": {}
+  }
+}
+```
+
+Everything get combined and validated through a swagger validator.
+
+# API Configuration
+
+```js
+var path = require('path');
+var docs = require('swaggerize-docs');
+
+// The folder path must be an absolute path
+var docsPath = path.join(__dirname, 'docs');
+// any other properties put on this object get put directly onto the swagger api doc object
+var docsOptions = {
+  definitionsDir: '_definitions', // The relative path to the definitions directory (relative to above path)
+  pathsDir: '' // The relative path to where the paths will be read from. Default is the root. This will ignore files in the definitionsDir.
+};
+
+docs(docsPath, docsOptions)
+  .then(function (api) {
+
+  })
+  .catch(function (err) {
+    // most likely swaggerize validation error
+  });
+```
+
+# Versioned api
+
+This is more of an experimental feature. If you'd like to read into it, feel
+free to look at the example in the examples directory, and into the source
+code (look for `compileDocs.versions`). Once it's better tested, I will include
+better docs on how to use it. Right now its usage is in flux, so don't be
+surprised if its api gets changed in the future.
