@@ -4,7 +4,9 @@
   "description": "A node module to help build more dynamic swaggerize doc files. Compliments swaggerize-express very well",
   "main": "index.js",
   "files": [
-    "index.js"
+    "index.js",
+    "lib/",
+    "LICENSE"
   ],
   "scripts": {
     "jshint": "jshint --reporter node_modules/jshint-stylish/stylish.js index.js lib/**",
