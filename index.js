@@ -45,32 +45,6 @@ function compileDocs(dir, options) {
 }
 
 /**
- * compileDocs.versions
- * This is just a wrapper around compileDocs that makes making a versioned api
- * with separate documentation super easy.
- */
-compileDocs.versions = function (dir, options) {
-  options = options || {};
-  var versionPattern = options.versionPattern || 'v*';
-  delete options.versionPattern;
-
-  return globAsync(versionPattern + '/', {cwd: dir})
-    .reduce(function (versions, version) {
-      var versionPath = '/' + version
-        .split(path.sep)
-        .filter(function (a) { return !!a; })
-        .join('/');
-      var versionDir = path.join(dir, version);
-      var versionOptions = merge(true, {basePath: versionPath}, options);
-      var versionKey = version.substr(0, version.length - 1);
-      return compileDocs(versionDir, versionOptions).then(function (api) {
-        versions[versionKey] = api;
-        return versions;
-      });
-    }, {});
-};
-
-/**
  * getApiDocs
  * This gets all of the definitions from all of the yaml files in the given
  * directory. This does not do any swagger validation

@@ -154,11 +154,3 @@ docs(docsPath, docsOptions)
     // most likely swaggerize validation error
   });
 ```
-
-# Versioned api
-
-This is more of an experimental feature. If you'd like to read into it, feel
-free to look at the example in the examples directory, and into the source
-code (look for `compileDocs.versions`). Once it's better tested, I will include
-better docs on how to use it. Right now its usage is in flux, so don't be
-surprised if its api gets changed in the future.
