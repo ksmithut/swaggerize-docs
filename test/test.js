@@ -43,21 +43,6 @@ describe('swaggerize-docs', function () {
 
   });
 
-  describe('versions example', function () {
-    var data = {
-      users: require('../examples/versioned/users.json'),
-      request: null
-    };
-    before(function () {
-      return require('../examples/versioned/app').then(function (app) {
-        data.request = supertest.agent(app);
-      });
-    });
-
-    testApi('/v1/users', data);
-
-  });
-
 });
 
 function testApi(endpoint, data) {
