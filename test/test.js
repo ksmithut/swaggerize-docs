@@ -43,6 +43,13 @@ describe('swaggerize-docs', function () {
 
   });
 
+  it('should include a file as a description if the "info.description" field is a path', function () {
+    return docs(path.join(__dirname, 'fixtures', 'path-description'), { descriptionFile: 'README.md' })
+      .then(function (api) {
+        expect(api.info.description.length).to.be.above(9);
+      });
+  });
+
 });
 
 function testApi(endpoint, data) {

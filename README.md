@@ -64,6 +64,8 @@ produces:
   - application/json
 ```
 
+> Note: You can also specify a file path in the configuration for your description (i.e. 'README.md')
+
 If you don't start your app with an npm command, then you will need to proved
 the required `info` properties. Or you can just explicitly define them like you
 should anyway.
@@ -143,6 +145,7 @@ var docsPath = path.join(__dirname, 'docs');
 // any other properties put on this object get put directly onto the swagger api doc object
 var docsOptions = {
   definitionsDir: '_definitions', // The relative path to the definitions directory (relative to above path)
+  descriptionFile: 'README.md', // Path of the file used for the API `info.description` property
   pathsDir: '' // The relative path to where the paths will be read from. Default is the root. This will ignore files in the definitionsDir.
 };
 

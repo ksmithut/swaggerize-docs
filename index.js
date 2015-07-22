@@ -1,5 +1,6 @@
 'use strict';
 
+var fs              = require('fs');
 var path            = require('path');
 var merge           = require('merge');
 var readYaml        = require('./lib/read-yaml');
@@ -32,6 +33,7 @@ function compileDocs(dir, options) {
 
   delete options.definitionsDir;
   delete options.pathsDir;
+  delete options.descriptionFile;
 
   return getApiDocs(dir, apiDocOptions)
     .then(function (api) {
@@ -58,6 +60,12 @@ function getApiDocs(dir, options) {
     })
     .then(function (baseApi) {
       api = baseApi;
+
+      if(options.descriptionFile) {
+        api.info.description = fs
+          .readFileSync(path.resolve(options.descriptionFile), 'utf8');
+      }
+
       return getPaths(
         path.resolve(dir, options.pathsDir),
         options.definitionsDir
