@@ -5,15 +5,14 @@
   "main": "index.js",
   "files": [
     "index.js",
-    "lib/",
     "LICENSE"
   ],
   "scripts": {
-    "jshint": "jshint --reporter node_modules/jshint-stylish/index.js index.js lib/**",
+    "lint": "eslint .",
     "check-cov": "istanbul check-coverage --statements 100 --functions 100 --branches 100 --lines 100",
     "test": "istanbul cover _mocha",
-    "posttest": " npm run check-cov; npm run jshint;",
-    "codeclimate": "cat ./coverage/lcov.info | codeclimate"
+    "posttest": " npm run check-cov; npm run lint;",
+    "codeclimate": "cat ./coverage/lcov.info | codeclimate-test-reporter"
   },
   "repository": {
     "type": "git",
@@ -34,23 +33,22 @@
   },
   "homepage": "https://github.com/ksmithut/swaggerize-docs",
   "dependencies": {
-    "bluebird": "^2.9.25",
-    "glob": "^5.0.5",
-    "js-yaml": "^3.3.0",
     "merge": "^1.2.0",
-    "swagger-parser": "^2.4.0"
+    "swagger-parser": "^3.3.0"
   },
   "devDependencies": {
+    "bluebird": "^2.10.2",
     "body-parser": "^1.12.4",
     "chai": "^3.0.0",
-    "codeclimate-test-reporter": "0.0.4",
+    "codeclimate-test-reporter": "0.1.1",
+    "eslint": "^1.6.0",
     "express": "^4.12.4",
+    "hyperbole": "^1.0.0",
     "istanbul": "^0.3.15",
-    "jshint": "^2.8.0",
-    "jshint-stylish": "^2.0.0",
     "mocha": "^2.2.4",
-    "mocha-lcov-reporter": "0.0.2",
-    "supertest": "^0.15.0",
+    "mocha-lcov-reporter": "1.0.0",
+    "supertest": "^1.1.0",
+    "supertest-as-promised": "^2.0.2",
     "swaggerize-express": "^4.0.0"
   }
 }

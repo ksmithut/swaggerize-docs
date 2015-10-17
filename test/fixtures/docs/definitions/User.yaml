@@ -1,0 +1,10 @@
+# docs/definitions/User.yaml
+properties:
+  email:
+    type: string
+  createdAt:
+    type: string
+    format: date-time
+  updatedAt:
+    type: string
+    format: date-time

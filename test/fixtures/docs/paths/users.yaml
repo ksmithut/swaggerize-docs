@@ -1,0 +1,11 @@
+# docs/paths/users.yaml
+get:
+  summary: List Users
+  description: Gets a list of users
+  responses:
+    200:
+      description: Success
+      schema:
+        type: array
+        items:
+          $ref: '#/definitions/User'

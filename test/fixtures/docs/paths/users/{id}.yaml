@@ -1,0 +1,17 @@
+# docs/paths/users/{id}.yaml
+get:
+  summary: Get a User
+  description: Gets a single user by id
+  parameters:
+    - name: id
+      in: path
+      type: string
+      required: true
+      description: The Id of the user to get
+  responses:
+    200:
+      description: Success
+      schema:
+        $ref: '#/definitions/User'
+    404:
+      description: Not Found

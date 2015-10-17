@@ -1,8 +1,5 @@
 # swaggerize-docs
 
-[![io.js compatibility](https://img.shields.io/badge/io.js-compatible-brightgreen.svg?style=flat)](https://iojs.org/)
-[![node.js compatibility](https://img.shields.io/badge/node.js-compatible-brightgreen.svg?style=flat)](https://nodejs.org/)
-
 [![NPM version](http://img.shields.io/npm/v/swaggerize-docs.svg?style=flat)](https://www.npmjs.org/package/swaggerize-docs)
 [![Dependency Status](http://img.shields.io/david/ksmithut/swaggerize-docs.svg?style=flat)](https://david-dm.org/ksmithut/swaggerize-docs)
 [![Dev Dependency Status](http://img.shields.io/david/dev/ksmithut/swaggerize-docs.svg?style=flat)](https://david-dm.org/ksmithut/swaggerize-docs#info=devDependencies&view=table)
@@ -12,6 +9,10 @@
 
 A complimentary swagger api docs that works especially well in conjunction with
 [`swaggerize-express`](https://github.com/krakenjs/swaggerize-express).
+
+NOTE: pre 1.0 did it a completely different way. This now is just a wrapper
+around [`swagger-parser`](https://github.com/BigstickCarpet/swagger-parser) with
+some default options in place.
 
 # Installation
 
@@ -23,137 +24,160 @@ You should also read up on the [Swagger spec](http://swagger.io/).
 
 # Usage
 
-This module is quite involved and requires you to set up your folder structure
-in a certain way. The best way to explain it is by example:
+In pre 1.0 versions, the directory structure was automatically loaded into your
+`paths` property for your api docs. In this version, it leverages the path
+dereferencing used by `swagger-parser`.
 
-See [examples](https://github.com/ksmithut/swaggerize-docs/tree/master/examples/)
+The following code snippets layout an app that looks like this:
 
-Basically, it builds out your swagger documentation by reading your folder
-structure and automagically combining them.
+```
+project/
+├─ app.js
+├─ docs/
+│  ├─ main.yaml
+│  ├─ paths/
+│  │  ├─ users.yaml
+│  │  └─ users/
+│  │     └─ {id}.yaml
+│  └─ definitions/
+│     └─ User.yaml
+└─ routes/
+   ├─ users.js
+   └─ users/
+      └─ {id}.js
+```
 
-You should have a folder dedicated to your swagger docs. In the examples, I use
-the `docs/` folder. Next, you should have in that folder an `index.yaml` with
-your top level swagger properties. It could look something like this:
+```js
+// app.js
+'use strict';
 
-(Note that any `.yaml` file extension can be replaced with `.yml`. Whatever you
-choose to do, just be consistent.)
+var path = require('path');
+var express = require('express');
+var swagger = require('swaggerize-express');
+var swaggerDocs = require('swaggerize-docs');
+var app = express();
+
+var DOCS_PATH = path.join(__dirname, 'docs', 'main.yaml');
+
+swaggerDocs(DOCS_PATH).then(function(api) {
+  app.use(swagger({
+    api: api,
+    docspath: '/api-docs'
+    handlers: './routes'
+  }));
+  app.listen(8000, function() {
+    console.log('server started');
+  });
+});
+```
+
+Documentation:
 
 ```yaml
+# docs/main.yaml
 swagger: '2.0'
 info:
   title: My API
-  description: This is my API
-  version: '1.0.0'
-host: myhost.com
-schemes:
-  - https
-basePath: /v1
-produces:
-  - application/json
+  description: 'My API description'
+  version: 1.0.0
+paths:
+  /users:
+    $ref: './paths/users.yaml'
+  /users/{id}:
+    $ref: './paths/users/{id}.yaml'
+definitions:
+  User:
+    $ref: './definitions/User.yaml'
 ```
 
-You don't have to include all of that. The default values are these:
-
 ```yaml
-swagger: '2.0'
-info:
-  title: # the npm package name in your package.json if you used npm start or another npm command
-  description: # the npm package description in your package.json if you used npm start or another npm command
-  version: # The npm package version in your package.json if you used npm start or another npm command
-produces:
-  - application/json
+# docs/paths/users.yaml
+get:
+  summary: List Users
+  description: Gets a list of users
+  responses:
+    200:
+      description: Success
+      schema:
+        type: array
+        items:
+          $ref: '#/definitions/User'
 ```
 
-> Note: You can also specify a file path in the configuration for your description (i.e. 'README.md')
-
-If you don't start your app with an npm command, then you will need to proved
-the required `info` properties. Or you can just explicitly define them like you
-should anyway.
-
-Next, in that docs folder, you should have another folder called `_definitions`.
-Every `.yaml` file in that directory (not subdirectories) will be attached to
-the `definitions` property.
-
-For example, if you have a `User.yaml` in your `_definitions` folder, and
-`User.yaml` looks like this:
+```yaml
+# docs/paths/users/{id}.yaml
+get:
+  summary: Get a User
+  description: Gets a single user by id
+  parameters:
+    - name: id
+      in: path
+      type: string
+      required: true
+      description: The Id of the user to get
+  responses:
+    200:
+      description: Success
+      schema:
+        $ref: '#/definitions/User'
+    404:
+      description: Not Found
+```
 
 ```yaml
+# docs/definitions/User.yaml
 properties:
   email:
     type: string
-    description: The user's unique email
-  firstName:
-    type: string
-    description: The user's first name
-  lastName:
-    type: string
-    description: The user's last name
+  createdAt:
+    type: date
+  updatedAt:
+    type: date
 ```
 
-...it will be attached to the `definitions` property of the swagger api docs
-like this:
+Actual Routes:
 
-```json
-{
-  "definitions": {
-    "User": {
-      "properties": {
-        "email": {"type": "string", "description": "The user's unique email"},
-        "firstName": {"type": "string", "description": "The user's first name"},
-        "lastName": {"type": "string", "description": "The user's last name"}
-      }
-    }
+```js
+// routes/users.js
+'use strict';
+
+var User = require('../models/user');
+
+module.exports = {
+  get: function(req, res, next) {
+    User.find()
+      .then(function(users) {
+        res.json(users);
+      })
+      .catch(next);
   }
-}
+};
 ```
 
-and can be used as a swagger `$ref` in `#/definitions/User`.
+```js
+// routes/users/{id}.js
+'use strict';
 
-As for your paths, the paths get automatically loaded in much like how
-`swaggerize-express` does it. If you have a `users.yaml` file in your docs
-directory, it will be loaded as:
+var User = require('../../models/user');
 
-```json
-{
-  "paths": {
-    "/users": {}
+module.exports = {
+  get: function(req, res, next) {
+    User.findById(req.params.id)
+      .then(function(user) {
+        if (!user) { return res.sendStatus(404); }
+        res.json(user);
+      })
+      .catch(next);
   }
-}
+};
 ```
-
-and if you have a `users/{id}.yaml` file in your docs directory, it will be
-loaded as:
-
-```json
-{
-  "paths": {
-    "/users/{id}": {}
-  }
-}
-```
-
-Everything get combined and validated through a swagger validator.
 
 # API Configuration
 
-```js
-var path = require('path');
-var docs = require('swaggerize-docs');
+## `swaggerDocs(docs, options)`
 
-// The folder path must be an absolute path
-var docsPath = path.join(__dirname, 'docs');
-// any other properties put on this object get put directly onto the swagger api doc object
-var docsOptions = {
-  definitionsDir: '_definitions', // The relative path to the definitions directory (relative to above path)
-  descriptionFile: 'README.md', // Path of the file used for the API `info.description` property
-  pathsDir: '' // The relative path to where the paths will be read from. Default is the root. This will ignore files in the definitionsDir.
-};
+* `docs` (String|Object) If a string is passed, it will read that as a filepath.
+  If you pass on object, it will read that as your swagger docs object.
 
-docs(docsPath, docsOptions)
-  .then(function (api) {
-
-  })
-  .catch(function (err) {
-    // most likely swaggerize validation error
-  });
-```
+* `options` (Object) This is just the options object as documented
+  [here](https://github.com/BigstickCarpet/swagger-parser/blob/master/docs/options.md)

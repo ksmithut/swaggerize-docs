@@ -1,0 +1,13 @@
+swagger: '2.0'
+info:
+  title: My API
+  description: 'My API description'
+  version: 1.0.0
+paths:
+  /users:
+    $ref: './paths/users.yaml'
+  /users/{id}:
+    $ref: './paths/users/{id}.yaml'
+definitions:
+  User:
+    $ref: './definitions/User.yaml'
